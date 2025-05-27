@@ -1,3 +1,4 @@
+import re
 import tempfile
 
 from docx import Document
@@ -7,7 +8,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Mm
 from docx2pdf import convert
 
-from utils import CellDirection, set_vertical_cell_direction
+from utils import CellDirection, create_image_for_direction, set_vertical_cell_direction
 
 
 class MiniBook:
@@ -20,6 +21,7 @@ class MiniBook:
     _PAGE_WIDTH = 210
     _PAGE_HEIGHT = 297
     _MARGIN = 4.0
+    _PARAGRAPH_MARGIN = 8.0
 
     _NUM_PAGES = 8
     _DEFAULT_PAGE_CONTENT = [str(i) for i in range(_NUM_PAGES)]
@@ -49,6 +51,16 @@ class MiniBook:
         page_section.top_margin = Mm(self._MARGIN)
         page_section.bottom_margin = Mm(self._MARGIN)
 
+        # paragraph format
+        paragraph_format = self._document.styles['Normal'].paragraph_format
+        paragraph_format.left_indent = Mm(self._PARAGRAPH_MARGIN)
+        paragraph_format.right_indent = Mm(self._PARAGRAPH_MARGIN)
+
+        # Font
+        font = self._document.styles['Normal'].font
+        font.name = "Arial"
+        font.size = Mm(6.0)
+
     def _setup_table(self, page_content: list[str]) -> None:
         # Table Setup
         table = self._document.add_table(rows=4, cols=2)
@@ -64,12 +76,24 @@ class MiniBook:
 
                 cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
-                cell_text = page_content[cell_id - 1]
+                paragraph = cell.add_paragraph()
+                paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                run = paragraph.add_run()
 
-                cell.text = cell_text
-                set_vertical_cell_direction(cell, cell_orientation)
-
-                cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                content = page_content[cell_id - 1]
+                img_match = re.match("<img>(.*?)</img>", content)
+                if img_match:
+                    # Extract image path from content
+                    img_path = img_match.group(1).strip()
+                    with create_image_for_direction(
+                        image_path=img_path,
+                        direction=cell_orientation,
+                    ) as rotated_img_path:
+                        run.add_picture(rotated_img_path, width=Mm(55.0), height=Mm(55.0))
+                else:
+                    run.add_text(content)
+                    
+                    set_vertical_cell_direction(cell, cell_orientation)
 
     def save(self, filename: str) -> None:
         self._document.save(filename)

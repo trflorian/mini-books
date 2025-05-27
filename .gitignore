@@ -9,6 +9,12 @@ wheels/
 # Virtual environments
 .venv
 
-# docx files
+# Inputs
+images/
+
+# Outputs
+output/
+
+# DOCX files
 *.docx
 .~lock.*
