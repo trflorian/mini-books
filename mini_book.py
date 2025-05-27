@@ -24,7 +24,7 @@ class MiniBook:
     _PARAGRAPH_MARGIN = 8.0
 
     _NUM_PAGES = 8
-    _DEFAULT_PAGE_CONTENT = [str(i) for i in range(_NUM_PAGES)]
+    _DEFAULT_PAGE_CONTENT = [str(i + 1) for i in range(_NUM_PAGES)]
 
     def __init__(self, page_content: list[str] = _DEFAULT_PAGE_CONTENT) -> None:
         if len(page_content) != self._NUM_PAGES:
@@ -52,12 +52,12 @@ class MiniBook:
         page_section.bottom_margin = Mm(self._MARGIN)
 
         # paragraph format
-        paragraph_format = self._document.styles['Normal'].paragraph_format
+        paragraph_format = self._document.styles["Normal"].paragraph_format
         paragraph_format.left_indent = Mm(self._PARAGRAPH_MARGIN)
         paragraph_format.right_indent = Mm(self._PARAGRAPH_MARGIN)
 
         # Font
-        font = self._document.styles['Normal'].font
+        font = self._document.styles["Normal"].font
         font.name = "Arial"
         font.size = Mm(6.0)
 
@@ -89,10 +89,12 @@ class MiniBook:
                         image_path=img_path,
                         direction=cell_orientation,
                     ) as rotated_img_path:
-                        run.add_picture(rotated_img_path, width=Mm(55.0), height=Mm(55.0))
+                        run.add_picture(
+                            rotated_img_path, width=Mm(55.0), height=Mm(55.0)
+                        )
                 else:
                     run.add_text(content)
-                    
+
                     set_vertical_cell_direction(cell, cell_orientation)
 
     def save(self, filename: str) -> None:

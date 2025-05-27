@@ -12,7 +12,6 @@ book = MiniBook(
         "Am Ende vom Regenbogen soll ein Schatz versteckt sein! Vielleicht ein Topf voller bunter Seifenblasen? Pffft... platsch!",
     ]
 )
-
 book.save("output/mini_book.docx")
 
 # NOTE: only works on Windows and macOS
