@@ -1,8 +1,11 @@
+import tempfile
+
 from docx import Document
 from docx.enum.section import WD_ORIENT
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Mm
+from docx2pdf import convert
 
 from utils import CellDirection, set_vertical_cell_direction
 
@@ -23,7 +26,9 @@ class MiniBook:
 
     def __init__(self, page_content: list[str] = _DEFAULT_PAGE_CONTENT) -> None:
         if len(page_content) != self._NUM_PAGES:
-            raise ValueError(f"Page content must contain exactly {self._NUM_PAGES} items.")
+            raise ValueError(
+                f"Page content must contain exactly {self._NUM_PAGES} items."
+            )
 
         self._document = Document()
 
@@ -68,3 +73,19 @@ class MiniBook:
 
     def save(self, filename: str) -> None:
         self._document.save(filename)
+
+    def export_to_pdf(self, filename: str) -> None:
+        """
+        Export the mini book to a PDF file.
+        NOTE: Requires `docx2pdf` package, only works on Windows and macOS.
+        Args:
+            filename (str): The name of the output PDF file.
+        """
+        with tempfile.NamedTemporaryFile(suffix=".docx") as tmp_file:
+            tmp_filename = tmp_file.name
+            self._document.save(tmp_filename)
+
+            convert(
+                input_path=tmp_filename,
+                output_path=filename,
+            )

@@ -14,3 +14,5 @@ book = MiniBook(
 )
 
 book.save("mini_book.docx")
+
+# book.export_to_pdf("mini_book.pdf")
